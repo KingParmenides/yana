@@ -90,6 +90,35 @@ class _SettingRouter extends State<WalletSettingsRouter> with WhenStopFunction {
 
     sections.add(SettingsSection(title: Text('Wallet'), tiles: walletTiles));
 
+    // Add NWC relays section if connected
+    final bla = nwcProvider!.connection;
+    if (nwcProvider != null && nwcProvider!.isConnected && nwcProvider!.connection != null) {
+      var nwcRelays = nwcProvider!.connection!.uri.relays;
+      if (nwcRelays != null && nwcRelays.isNotEmpty) {
+        List<AbstractSettingsTile> relayTiles = [];
+        for (String relayUrl in nwcRelays) {
+          bool isConnected = ndk.relays.isRelayConnected(relayUrl);
+          relayTiles.add(SettingsTile(
+            leading: Icon(
+              isConnected ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: isConnected ? Colors.green : Colors.grey,
+            ),
+            title: Text(relayUrl),
+            trailing: Text(
+              isConnected ? 'Connected' : 'Disconnected',
+              style: TextStyle(
+                color: isConnected ? Colors.green : Colors.grey,
+              ),
+            ),
+          ));
+        }
+        sections.add(SettingsSection(
+          title: Text('Relays'),
+          tiles: relayTiles,
+        ));
+      }
+    }
+
     SettingsList settingsList = SettingsList(
         applicationType: ApplicationType.both,
         // contentPadding: const EdgeInsets.only(top: Base.BASE_PADDING),
